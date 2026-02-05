@@ -1,0 +1,120 @@
+{% extends "explorer/base.html" %}
+
+{% block title %}Account {{ address }}{% endblock %}
+
+{% block content %}
+  <div class="subtle" style="margin-bottom:10px; letter-spacing:.2px;">DETAILS</div>
+  <h1 style="margin:0 0 18px 0; font-size:28px;">Account</h1>
+
+  <div class="grid">
+    <!-- Left: Overview -->
+    <section class="panel">
+      <div class="panel-h">
+        <div>
+          <p class="panel-title" style="margin-bottom:6px;">Overview</p>
+          <div class="subtle">Wallet/account information</div>
+        </div>
+
+        <div class="row">
+          <button class="btn" data-copy="{{ address }}">Copy address</button>
+        </div>
+      </div>
+
+      <div class="panel-b">
+        <div class="kv">
+          <div class="k">Address</div>
+          <div class="v mono">{{ address }}</div>
+        </div>
+
+        <div class="kv">
+          <div class="k">SOL Balance</div>
+          <div class="v mono">
+            {{ balance_sol|floatformat:9 }} SOL
+            <span class="muted">({{ balance_lamports }} lamports)</span>
+          </div>
+        </div>
+
+        <div class="kv">
+          <div class="k">Recent transactions</div>
+          <div class="v mono">{{ txs|length }}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: Quick facts -->
+    <aside class="panel">
+      <div class="panel-h">
+        <div>
+          <p class="panel-title" style="margin-bottom:6px;">Quick facts</p>
+          <div class="subtle">Shortcuts</div>
+        </div>
+      </div>
+
+      <div class="panel-b">
+        <div class="kv">
+          <div class="k">Network</div>
+          <div class="v">Devnet</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div style="height:16px;"></div>
+
+  <!-- Transactions list -->
+  <section class="panel">
+    <div class="panel-h">
+      <div>
+        <p class="panel-title" style="margin-bottom:6px;">Transactions</p>
+        <div class="subtle">Last 20 signatures for this address</div>
+      </div>
+    </div>
+
+    <div class="panel-b">
+      {% if txs %}
+        <ul class="list">
+          {% for t in txs %}
+            <li class="item">
+              <div class="left">
+                <div class="mono" style="font-size:13px; word-break:break-all;">
+                  <a href="/tx/{{ t.signature }}/">{{ t.signature }}</a>
+                </div>
+                <div class="muted" style="font-size:12px; margin-top:6px;">
+                  Slot: <span class="mono">{{ t.slot }}</span>
+                  <span class="muted">•</span>
+                  <span class="mono" data-bt="{{ t.block_time|default_if_none:'' }}"></span>
+                </div>
+              </div>
+
+              <div class="right">
+                {% if t.success %}
+                  <span class="badge"><span class="dot"></span> Success</span>
+                {% else %}
+                  <span class="badge"><span class="dot fail"></span> Failed</span>
+                {% endif %}
+                <a class="btn" href="/tx/{{ t.signature }}/">View</a>
+                <button class="btn" data-copy="{{ t.signature }}">Copy</button>
+              </div>              
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="subtle">No recent transactions found for this address.</div>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Render blockTime timestamps in local time for each row
+  document.querySelectorAll("[data-bt]").forEach((el) => {
+    const v = el.getAttribute("data-bt");
+    if (!v) { el.textContent = "Time: N/A"; return; }
+    const bt = Number(v);
+    if (!bt) { el.textContent = "Time: N/A"; return; }
+    const d = new Date(bt * 1000);
+    el.textContent = "Time: " + d.toLocaleString(undefined, {year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit"});
+  });
+</script>
+{% endblock %}

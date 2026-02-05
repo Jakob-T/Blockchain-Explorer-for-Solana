@@ -1,0 +1,248 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Solana Explorer{% endblock %}</title>
+
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#0f1620;
+      --panel2:#0c121a;
+      --border:rgba(255,255,255,.08);
+      --text:#e6edf3;
+      --muted:#9fb0c0;
+      --accent:#21e6c1;
+      --accent2:#7c5cff;
+      --danger:#ff5c7a;
+      --shadow: 0 16px 40px rgba(0,0,0,.45);
+      --radius:14px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(124,92,255,.18), transparent 60%),
+                  radial-gradient(900px 500px at 90% 10%, rgba(33,230,193,.14), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit; text-decoration:none}
+    .container{max-width:1100px; margin:0 auto; padding:24px}
+    .topbar{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(11,15,20,.75);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-inner{
+      max-width:1100px; margin:0 auto; padding:14px 24px;
+      display:flex; align-items:center; gap:14px; justify-content:space-between;
+    }
+    .brand{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.4px}
+    .logo-dot{
+      width:10px; height:10px; border-radius:999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 0 6px rgba(33,230,193,.08);
+    }
+    .search{
+      flex:1;
+      display:flex; align-items:center; gap:10px;
+      max-width:640px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 10px 14px;
+    }
+    .search input{
+      width:100%;
+      border:none; outline:none;
+      background: transparent;
+      color: var(--text);
+      font-size:14px;
+    }
+    .kbd{
+      font-family:var(--mono);
+      font-size:12px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-bottom-color: rgba(255,255,255,.16);
+      padding: 3px 8px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.03);
+    }
+    .chip{
+      font-size:12px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      padding:6px 10px;
+      border-radius: 999px;
+      color: var(--muted);
+    }
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.02));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .panel-h{
+      padding: 18px 18px 12px 18px;
+      border-bottom: 1px solid var(--border);
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+    }
+    .panel-title{font-size:16px; font-weight:700; margin:0}
+    .subtle{color:var(--muted); font-size:13px}
+    .panel-b{padding:18px}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    @media(min-width:900px){
+      .grid{grid-template-columns: 1.2fr .8fr;}
+    }
+    .kv{
+      display:grid;
+      grid-template-columns: 180px 1fr;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .kv:last-child{border-bottom:none}
+    .k{color:var(--muted); font-size:13px}
+    .v{font-size:13px; word-break:break-word}
+    .mono{font-family:var(--mono)}
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:12px; font-weight:700;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+    }
+    .dot{
+      width:8px; height:8px; border-radius:999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(33,230,193,.10);
+    }
+    .dot.fail{
+      background: var(--danger);
+      box-shadow: 0 0 0 6px rgba(255,92,122,.10);
+    }
+    .btn{
+      cursor:pointer;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+    .btn:hover{border-color: rgba(255,255,255,.18)}
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .list{
+      margin:0; padding:0; list-style:none;
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .item{
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255,255,255,.02);
+      display:flex; justify-content:space-between; gap:12px; align-items:flex-start;
+    }
+    .item .left{min-width:0}
+    .item .right{display:flex; gap:8px; align-items:center}
+    .muted{color:var(--muted)}
+    .toast{
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(15,22,32,.92);
+      color: var(--text);
+      font-size: 13px;
+      display:none;
+      box-shadow: var(--shadow);
+    }
+  </style>
+
+  {% block head %}{% endblock %}
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/">
+        <span class="logo-dot"></span>
+        <span>SOLANA</span>
+        <span class="subtle" style="letter-spacing:.2px;">Explorer</span>
+      </a>
+
+      <form class="search" action="/search" method="get">
+        <span class="muted" style="font-size:14px;"></span>
+        <input name="q" placeholder="Search for blocks, accounts, transactions, programs, and tokens" />
+        <span class="kbd">/</span>
+      </form>
+
+      <span class="chip">Devnet</span>
+    </div>
+  </div>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // "/" focuses search
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "/" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+        e.preventDefault();
+        const inp = document.querySelector(".search input");
+        if (inp) inp.focus();
+      }
+    });
+
+    function toast(msg) {
+      const el = document.getElementById("toast");
+      if (!el) return;
+      el.textContent = msg;
+      el.style.display = "block";
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => el.style.display = "none", 1400);
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        toast("Copied");
+      } catch {
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        toast("Copied");
+      }
+    }
+
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-copy]");
+      if (!btn) return;
+      copyText(btn.getAttribute("data-copy"));
+    });
+  </script>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

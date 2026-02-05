@@ -1,0 +1,151 @@
+{% extends "explorer/base.html" %}
+
+{% block title %}Transaction {{ tx.signature }}{% endblock %}
+
+{% block content %}
+  <div class="subtle" style="margin-bottom:10px; letter-spacing:.2px;">DETAILS</div>
+  <h1 style="margin:0 0 18px 0; font-size:28px;">Transaction</h1>
+
+  <div class="grid">
+    <!-- Left: Overview -->
+    <section class="panel">
+      <div class="panel-h">
+        <div>
+          <p class="panel-title" style="margin-bottom:6px;">Overview</p>
+          <div class="subtle">Basic transaction details</div>
+        </div>
+
+        <div class="row">
+          {% if tx.success %}
+            <span class="badge"><span class="dot"></span> Success</span>
+          {% else %}
+            <span class="badge"><span class="dot fail"></span> Failed</span>
+          {% endif %}
+          <button class="btn" data-copy="{{ tx.signature }}">Copy signature</button>
+        </div>
+      </div>
+
+      <div class="panel-b">
+        <div class="kv">
+          <div class="k">Signature</div>
+          <div class="v mono">{{ tx.signature }}</div>
+        </div>
+
+        <div class="kv">
+          <div class="k">Slot</div>
+          <div class="v mono">{{ tx.slot }}</div>
+        </div>
+
+        <div class="kv">
+          <div class="k">Fee</div>
+          <div class="v mono">
+            <span id="fee-sol"></span>
+            <span class="muted">({{ tx.fee_lamports }} lamports)</span>
+          </div>
+        </div>
+
+        <div class="kv">
+          <div class="k">Block Time</div>
+          <div class="v">
+            <span id="time-local" class="mono"></span>
+            <span class="muted">•</span>
+            <span id="time-utc" class="mono muted"></span>
+          </div>
+        </div>
+
+        <div class="kv">
+          <div class="k">Instructions</div>
+          <div class="v mono">{{ tx.instructions_count }}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: Quick facts -->
+    <aside class="panel">
+      <div class="panel-h">
+        <div>
+          <p class="panel-title" style="margin-bottom:6px;">Quick facts</p>
+          <div class="subtle">Helpful shortcuts</div>
+        </div>
+      </div>
+      <div class="panel-b">
+        <div class="kv">
+          <div class="k">Network</div>
+          <div class="v">Devnet</div>
+        </div>
+
+        <div class="kv">
+          <div class="k">Accounts</div>
+          <div class="v mono">{{ tx.accounts|length }}</div>
+        </div>
+
+        <div class="kv">
+          <div class="k">Copy all</div>
+          <div class="v">
+            <button class="btn" data-copy="{{ tx.accounts|join:'\n' }}">Copy accounts list</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div style="height:16px;"></div>
+
+  <!-- Accounts list -->
+  <section class="panel">
+    <div class="panel-h">
+      <div>
+        <p class="panel-title" style="margin-bottom:6px;">Accounts</p>
+        <div class="subtle">All accounts referenced by the transaction message</div>
+      </div>
+    </div>
+
+    <div class="panel-b">
+      <ul class="list">
+        {% for acc in tx.accounts %}
+          <li class="item">
+            <div class="left">
+              <div class="mono" style="font-size:13px; word-break:break-all;">{{ acc }}</div>
+              <div class="muted" style="font-size:12px; margin-top:4px;">
+                Account #{{ forloop.counter }}
+              </div>
+            </div>
+            <div class="right">
+              <a class="btn" href="/account/{{ acc }}/">View</a>
+              <button class="btn" data-copy="{{ acc }}">Copy</button>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Lamports -> SOL
+  (function(){
+    const lamports = Number("{{ tx.fee_lamports }}");
+    const sol = lamports / 1_000_000_000;
+    const el = document.getElementById("fee-sol");
+    if (el) el.textContent = sol.toFixed(9) + " SOL ";
+  })();
+
+  // blockTime -> local + utc
+  (function(){
+    const bt = Number("{{ tx.block_time|default:0 }}");
+    const localEl = document.getElementById("time-local");
+    const utcEl = document.getElementById("time-utc");
+
+    if (!bt) {
+      if (localEl) localEl.textContent = "N/A";
+      if (utcEl) utcEl.textContent = "";
+      return;
+    }
+
+    const d = new Date(bt * 1000);
+    if (localEl) localEl.textContent = d.toLocaleString(undefined, {year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit"});
+    if (utcEl) utcEl.textContent = d.toUTCString();
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,157 @@
+{% extends "explorer/base.html" %}
+{% block title %}Solana Explorer{% endblock %}
+
+{% block content %}
+  <div class="subtle" style="margin-bottom:10px; letter-spacing:.2px;">OVERVIEW</div>
+  <h1 style="margin:0 0 18px 0; font-size:28px;">Dashboard</h1>
+
+  <div class="grid">
+    <section class="panel">
+      <div class="panel-h">
+        <div>
+          <p class="panel-title" style="margin-bottom:6px;">Network</p>
+          <div class="subtle">Live data via Solana JSON-RPC</div>
+        </div>
+        <div class="row">
+          <span class="chip">{{ network }}</span>
+        </div>
+      </div>
+
+      <div class="panel-b">
+        <div class="kv">
+          <div class="k">Current slot</div>
+          <div class="v mono"><a href="/slot/{{ current_slot }}/">{{ current_slot }}</a></div>
+        </div>
+
+        <div class="kv">
+          <div class="k">Epoch</div>
+          <div class="v mono">{{ epoch }}</div>
+        </div>
+
+        <div class="kv">
+          <div class="k">Slot in epoch</div>
+          <div class="v mono">{{ slot_index }} / {{ slots_in_epoch }}</div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="panel-h">
+        <div>
+          <p class="panel-title" style="margin-bottom:6px;">Tips</p>
+          <div class="subtle">Try searching for a slot, signature, or address</div>
+        </div>
+      </div>
+
+      <div class="panel-b">
+        <div class="kv">
+          <div class="k">Slot examples</div>
+          <div class="v mono">439,928,208</div>
+        </div>
+
+        <div class="kv">
+          <div class="k">Signature</div>
+          <div class="v">Use a transaction signature from the tables below</div>
+        </div>
+
+        <div class="kv">
+          <div class="k">Address</div>
+          <div class="v">Open a transaction and click an account</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div style="height:16px;"></div>
+
+  <div class="grid" style="grid-template-columns: 1fr;">
+    <section class="panel">
+      <div class="panel-h">
+        <div>
+          <p class="panel-title" style="margin-bottom:6px;">Latest slots</p>
+          <div class="subtle">Most recent slot numbers</div>
+        </div>
+      </div>
+
+      <div class="panel-b">
+        <ul class="list">
+          {% for s in latest_slots %}
+            <li class="item">
+              <div class="left">
+                <div class="mono" style="font-size:13px;">
+                  <a href="/slot/{{ s }}/">{{ s }}</a>
+                </div>
+                <div class="muted" style="font-size:12px; margin-top:6px;">
+                  Slot
+                </div>
+              </div>
+              <div class="right">
+                <a class="btn" href="/slot/{{ s }}/">View</a>
+                <button class="btn" data-copy="{{ s }}">Copy</button>
+              </div>              
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+
+    <div style="height:16px;"></div>
+
+    <section class="panel">
+      <div class="panel-h">
+        <div>
+          <p class="panel-title" style="margin-bottom:6px;">Recent transactions</p>
+          <div class="subtle">
+            {% if tx_source_slot %}
+              From slot <span class="mono"><a href="/slot/{{ tx_source_slot }}/">{{ tx_source_slot }}</a></span>
+            {% else %}
+              No recent transactions found (try refresh)
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-b">
+        {% if recent_txs %}
+          <ul class="list">
+            {% for t in recent_txs %}
+              <li class="item">
+                <div class="left">
+                  <div class="mono" style="font-size:13px; word-break:break-all;">
+                    <a href="/tx/{{ t.signature }}/">{{ t.signature }}</a>
+                  </div>
+                  <div class="muted" style="font-size:12px; margin-top:6px;">
+                    Fee: <span class="mono" data-fee="{{ t.fee_lamports }}">{{ t.fee_lamports }}</span> lamports
+                  </div>
+                </div>
+
+                <div class="right">
+                  {% if t.success %}
+                    <span class="badge"><span class="dot"></span> Success</span>
+                  {% else %}
+                    <span class="badge"><span class="dot fail"></span> Failed</span>
+                  {% endif %}
+                  <a class="btn" href="/tx/{{ t.signature }}/">View</a>
+                  <button class="btn" data-copy="{{ t.signature }}">Copy</button>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="subtle">No transactions available right now. Refresh the page.</div>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Optional: show fee in SOL on hover via title
+  document.querySelectorAll("[data-fee]").forEach((el) => {
+    const lamports = Number(el.getAttribute("data-fee") || "0");
+    const sol = lamports / 1_000_000_000;
+    el.title = sol.toFixed(9) + " SOL";
+  });
+</script>
+{% endblock %}

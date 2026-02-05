@@ -1,0 +1,42 @@
+{% extends "explorer/base.html" %}
+{% block title %}Search{% endblock %}
+
+{% block content %}
+  <div class="subtle" style="margin-bottom:10px; letter-spacing:.2px;">SEARCH</div>
+  <h1 style="margin:0 0 18px 0; font-size:28px;">No results</h1>
+
+  <section class="panel">
+    <div class="panel-h">
+      <div>
+        <p class="panel-title" style="margin-bottom:6px;">We could not process your query</p>
+        <div class="subtle">Try a slot number, transaction signature, or wallet address.</div>
+      </div>
+    </div>
+
+    <div class="panel-b">
+      <div class="kv">
+        <div class="k">Your input</div>
+        <div class="v mono">{{ query|default:"(empty)" }}</div>
+      </div>
+
+      <div class="kv">
+        <div class="k">Message</div>
+        <div class="v">{{ message }}</div>
+      </div>
+
+      <div style="margin-top:14px;" class="row">
+        <a class="btn" href="/">Go home</a>
+        <button class="btn" onclick="document.querySelector('.search input')?.focus()">Try again</button>
+      </div>
+
+      <div style="margin-top:16px;" class="subtle">
+        Examples:
+        <div class="mono" style="margin-top:8px;">
+          439,928,208<br/>
+          4g8… (wallet address)<br/>
+          5uP… (transaction signature)
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}

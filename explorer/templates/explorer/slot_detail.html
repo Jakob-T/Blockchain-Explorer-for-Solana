@@ -1,0 +1,120 @@
+{% extends "explorer/base.html" %}
+{% block title %}Slot {{ slot }}{% endblock %}
+
+{% block content %}
+  <div class="subtle" style="margin-bottom:10px; letter-spacing:.2px;">DETAILS</div>
+  <h1 style="margin:0 0 18px 0; font-size:28px;">Block</h1>
+
+  <div class="grid">
+    <section class="panel">
+      <div class="panel-h">
+        <div>
+          <p class="panel-title" style="margin-bottom:6px;">Overview</p>
+          <div class="subtle">Slot and block metadata</div>
+        </div>
+        <div class="row">
+          <button class="btn" data-copy="{{ blockhash }}">Copy blockhash</button>
+        </div>
+      </div>
+
+      <div class="panel-b">
+        <div class="kv">
+          <div class="k">Slot</div>
+          <div class="v mono">{{ slot }}</div>
+        </div>
+        <div class="kv">
+          <div class="k">Blockhash</div>
+          <div class="v mono">{{ blockhash }}</div>
+        </div>
+        <div class="kv">
+          <div class="k">Parent Slot</div>
+          <div class="v mono">{{ parent_slot }}</div>
+        </div>
+        <div class="kv">
+          <div class="k">Transactions</div>
+          <div class="v mono">{{ tx_count }}</div>
+        </div>
+        <div class="kv">
+          <div class="k">Block Time</div>
+          <div class="v">
+            <span id="time-local" class="mono"></span>
+            <span class="muted">•</span>
+            <span id="time-utc" class="mono muted"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="panel-h">
+        <div>
+          <p class="panel-title" style="margin-bottom:6px;">Quick facts</p>
+          <div class="subtle">Shortcuts</div>
+        </div>
+      </div>
+      <div class="panel-b">
+        <div class="kv">
+          <div class="k">Network</div>
+          <div class="v">Devnet</div>
+        </div>
+        <div class="kv">
+          <div class="k">Copy</div>
+          <div class="v">
+            <button class="btn" data-copy="{{ tx_sigs|join:'\n' }}">Copy tx signatures (shown)</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div style="height:16px;"></div>
+
+  <section class="panel">
+    <div class="panel-h">
+      <div>
+        <p class="panel-title" style="margin-bottom:6px;">Transactions</p>
+        <div class="subtle">First 50 transaction signatures in this slot</div>
+      </div>
+    </div>
+
+    <div class="panel-b">
+      {% if tx_sigs %}
+        <ul class="list">
+          {% for sig in tx_sigs %}
+            <li class="item">
+              <div class="left">
+                <div class="mono" style="font-size:13px; word-break:break-all;">
+                  <a href="/tx/{{ sig }}/">{{ sig }}</a>
+                </div>
+              </div>
+              <div class="right">
+                <a class="btn" href="/tx/{{ sig }}/">View</a>
+                <button class="btn" data-copy="{{ sig }}">Copy</button>
+              </div>              
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="subtle">No transactions found in this slot.</div>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function(){
+    const bt = Number("{{ block_time|default:0 }}");
+    const localEl = document.getElementById("time-local");
+    const utcEl = document.getElementById("time-utc");
+    if (!bt) {
+      if (localEl) localEl.textContent = "N/A";
+      if (utcEl) utcEl.textContent = "";
+      return;
+    }
+    const d = new Date(bt * 1000);
+    if (localEl) localEl.textContent = d.toLocaleString(undefined, {year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit"});
+    if (utcEl) utcEl.textContent = d.toUTCString();
+  })();
+</script>
+{% endblock %}
