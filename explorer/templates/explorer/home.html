@@ -1,5 +1,7 @@
-{% extends "explorer/base.html" %}
-{% block title %}Solana Explorer{% endblock %}
+{% extends 'explorer/base.html' %}
+{% block title %}
+  Solana Explorer
+{% endblock %}
 
 {% block content %}
   <div class="subtle" style="margin-bottom:10px; letter-spacing:.2px;">OVERVIEW</div>
@@ -20,7 +22,9 @@
       <div class="panel-b">
         <div class="kv">
           <div class="k">Current slot</div>
-          <div class="v mono"><a href="/slot/{{ current_slot }}/">{{ current_slot }}</a></div>
+          <div class="v mono">
+            <a href="/slot/{{ current_slot }}/">{{ current_slot }}</a>
+          </div>
         </div>
 
         <div class="kv">
@@ -81,14 +85,12 @@
                 <div class="mono" style="font-size:13px;">
                   <a href="/slot/{{ s }}/">{{ s }}</a>
                 </div>
-                <div class="muted" style="font-size:12px; margin-top:6px;">
-                  Slot
-                </div>
+                <div class="muted" style="font-size:12px; margin-top:6px;">Slot</div>
               </div>
               <div class="right">
                 <a class="btn" href="/slot/{{ s }}/">View</a>
                 <button class="btn" data-copy="{{ s }}">Copy</button>
-              </div>              
+              </div>
             </li>
           {% endfor %}
         </ul>
@@ -146,12 +148,12 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-  // Optional: show fee in SOL on hover via title
-  document.querySelectorAll("[data-fee]").forEach((el) => {
-    const lamports = Number(el.getAttribute("data-fee") || "0");
-    const sol = lamports / 1_000_000_000;
-    el.title = sol.toFixed(9) + " SOL";
-  });
-</script>
+  <script>
+    // Optional: show fee in SOL on hover via title
+    document.querySelectorAll('[data-fee]').forEach((el) => {
+      const lamports = Number(el.getAttribute('data-fee') || '0')
+      const sol = lamports / 1_000_000_000
+      el.title = sol.toFixed(9) + ' SOL'
+    })
+  </script>
 {% endblock %}
